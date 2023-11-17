@@ -29,10 +29,11 @@ function module.delete (name)
   local fp = module.filepath(name)
   if vim.fn.filereadable(fp) == 1 then
     if vim.fn.confirm('Delete: ' .. name .. '?', '&Yes\n&No', 2) ~= 1 then
-      return
+      return false
     end
     vim.fn.delete(fp)
     vim.notify('Deleted: ' .. name)
+    return true
   end
 end
 

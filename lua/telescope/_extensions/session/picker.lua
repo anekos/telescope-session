@@ -17,17 +17,17 @@ return function(opts)
       },
       sorter = sorters.fuzzy_with_index_bias(),
       attach_mappings = function(prompt_bufnr, map)
-
         actions.select_default:replace(function()
           actions.close(prompt_bufnr)
           lib.open(state.get_selected_entry().value)
         end)
 
         map('n', 'dd', function()
-          actions.close(prompt_bufnr)
-          lib.delete(state.get_selected_entry().value)
+          local current_picker = state.get_current_picker(prompt_bufnr)
+          current_picker:delete_selection(function(_)
+            return lib.delete(state.get_selected_entry().value)
+          end)
         end)
-
         return true
       end,
     })
