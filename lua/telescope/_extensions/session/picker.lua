@@ -6,32 +6,30 @@ local state = require('telescope.actions.state')
 
 local lib = require('telescope-session')
 
-return function (opts)
+return function(opts)
   opts = opts or {}
 
-  local files = vim.fn.glob(lib.dir() .. '*.vim', true, true)
+  pickers
+    .new(opts, {
+      prompt_title = 'Sessions',
+      finder = finders.new_table {
+        results = lib.names(),
+      },
+      sorter = sorters.fuzzy_with_index_bias(),
+      attach_mappings = function(prompt_bufnr, map)
 
-  pickers.new(opts, {
-    prompt_title = 'Sessions',
-    finder = finders.new_table {
-      results = files,
-      entry_maker = function (path)
-        local name = vim.fn.fnamemodify(path, ':t:r')
-        return {
-          value = path,
-          display = name,
-          ordinal = name,
-        }
-      end
-    },
-    sorter = sorters.fuzzy_with_index_bias(),
-    attach_mappings = function(prompt_bufnr, map)
-      actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
-        local selection = state.get_selected_entry()
-        vim.cmd('source ' .. selection.value)
-      end)
-      return true
-    end,
-  }):find()
+        actions.select_default:replace(function()
+          actions.close(prompt_bufnr)
+          lib.open(state.get_selected_entry().value)
+        end)
+
+        map('n', 'dd', function()
+          actions.close(prompt_bufnr)
+          lib.delete(state.get_selected_entry().value)
+        end)
+
+        return true
+      end,
+    })
+    :find()
 end
